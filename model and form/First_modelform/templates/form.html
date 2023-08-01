@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+
+
+
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Form</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="">
+    </head>
+    <body> 
+{% extends 'base.html' %}
+{% block body_block %}
+         <h1>This is Form </h1>
+         <a href="{% url 'First_App:table'%}">Add New</a>
+        <form action =" " method="POST">
+        {% csrf_token %}
+        {{text_form.as_p}}
+        <input type="submit" value="Submit">
+        </form>
+
+        <a href ="/">Add New </a>
+        <form action=" " method = "POST">
+        {% csrf_token %}
+        {{text2_form.as_p}}
+        <input type="submit" name="submit" value="Submit">
+        </form>
+        
+        <script src="" async defer></script>
+        {% endblock %}
+    </body>
+</html>
+
+<!--   # models.py ############################
+from django.db import models
+
+
+# Create your models here.
+class First_Table(models.Model):
+    F_Name=models.CharField(max_length=30)
+    L_Name=models.CharField(max_length=30)
+    V_Name=models.CharField(max_length=40)
+    S_Id=models.IntegerField()
+    S_Cgpa=models.FloatField()
+    S_Age=models.IntegerField()
+
+    def __str__(self):
+     return self.F_Name + " " + self.L_Name
+
+
+class Second_table(models.Model):
+   First_Name=models.CharField(max_length=30)
+   Last_Name=models.CharField(max_length=30)
+   Versity_Name=models.CharField(max_length=40)
+   Student_Mail=models.EmailField()
+
+   def __str__(self):
+      return self.First_Name + " " + self.Last_Name   
+
+
+
+
+      # views.py #######################
+
+      from django.shortcuts import render
+from django.http import HttpResponse
+from First_App.models import First_Table
+from First_App.models import Second_table
+from First_App import form
+from First_App.form import tableform
+
+# Create your views here.
+def table(request):
+    New_Table=First_Table.objects.order_by("F_Name")
+    Old_Table=Second_table.objects.order_by("First_Name")
+    diction={'heading_1':'This is first table','First_Table':New_Table,'Second_table':Old_Table,'Second_t':"This is Second Table"}
+    return render (request, 'table.html', context=diction)
+def form_contact(request):
+    new_form=form.tableform()
+    old_form=form.secondform()
+    if request.method == "POST":
+        new_form=form.tableform(request.POST)
+        
+        if new_form.is_valid():
+        
+            old_form.save(commit=True)   
+            
+            return table(request)
+            
+    
+    old_form=form.secondform()
+    if request.method == "POST":
+       old_form=form.secondform(request.POST)
+
+       if old_form.is_valid():
+          old_form.save(commit=True)
+          return table(request)
+    diction={'text_form':new_form,'text2_form':old_form}
+    return render(request,'form.html', context=diction)
+
+
+    # form.html #########################################
+
+    <!DOCTYPE html>
+
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Form</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="">
+    </head>
+    <body> 
+         <h1>This is Form </h1>
+         <a href="/">Add New</a>
+        <form action =" " method="POST">
+        {% csrf_token %}
+        {{text_form.as_p}}
+        <input type="submit" value="Submit">
+        </form>
+
+        <a href ="/">Add New </a>
+        <form action=" " method = "POST">
+        {% csrf_token %}
+        {{text2_form.as_p}}
+        <input type="submit" name="submit" value="Submit">
+        </form>
+        
+        <script src="" async defer></script>
+    </body>
+</html>
+
+
+
+# table.html########################
+
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>table</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="">
+    </head>
+    <body>
+        <h1>{{heading_1}}</h1>
+        <a href="form_contact/">Add New</a>
+        <table border="1px">
+                <tr>
+                <th>First Name </th>
+                <th>Last Name </th>
+                <th>Versity Name </th>
+                <th>Student ID </th>
+                <th>Student CGPA </th>
+                <th>Student Age </th>
+                </tr>
+                {% for row in First_Table %}
+                <tr>
+                <td>{{row.F_Name}}</td>
+                <td>{{row.L_Name}}</td>
+                <td>{{row.V_Name}}</td>
+                <td>{{row.S_Id}}</td>
+                <td>{{row.S_Cgpa}}</td>
+                <td>{{row.S_Age}}</td>
+                </tr>
+                {% endfor %}
+     </table>
+     <h1>{{Second_t}}</h1>
+     <a href="form_contact/">Add New</a>
+     <table border="1px">
+                <tr>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Versity Name </th>
+                <th>Student Mail </th>
+                </tr>
+                {% for row in Second_table %}
+                <tr>
+                  <td>{{row.First_Name}}</td>
+                  <td>{{row.Last_Name}}</td>
+                  <td>{{row.Versity_Name}}</td>
+                  <td>{{row.Student_Mail}}</td>
+                
+                </tr>
+
+                {% endfor %}
+     </table>
+        
+        <script src="" async defer></script>
+    </body>
+</html>
+
+# form.py ######################
+
+from django import forms
+#from First_App.models import First_Table
+from First_App import models
+
+class tableform(forms.ModelForm):
+    class Meta:
+        model=models.First_Table
+        fields = "__all__"
+
+class secondform(forms.ModelForm):
+    class Meta:
+        model=models.Second_table
+        fields = "__all__"
+        #fields=('First_name','last_Name') # choose korte chasce mane rakte jasce
+       # exclude=['First_Name'] # ami jeye field gula bad dete chasce
+
+## urls.py ##########
+
+from django.urls import path
+from . import views
+
+
+urlpatterns=[
+    path('',views.table, name='table'),
+    path('form_contact/', views.form_contact, name='form_contact'),
+]
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+-->
